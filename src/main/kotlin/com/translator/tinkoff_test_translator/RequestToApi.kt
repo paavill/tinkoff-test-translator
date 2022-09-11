@@ -1,0 +1,3 @@
+package com.translator.tinkoff_test_translator
+
+interface RequestToApi

@@ -1,0 +1,86 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Test task for passing the second stage of the interview at Tinkoff",
+    "version": "1.0",
+    "title": "Translator",
+    "contact": {
+      "name": "Pavel",
+      "url": "https://github.com/paavill",
+      "email": "pavelchist2001@gmail.com"
+    }
+  },
+  "host": "localhost:8080",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "translator-controller",
+      "description": "Translator Controller"
+    }
+  ],
+  "paths": {
+    "/translate": {
+      "post": {
+        "tags": [
+          "translator-controller"
+        ],
+        "summary": "translate",
+        "operationId": "translateUsingPOST",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "requestData",
+            "description": "requestData",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TranslateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/TranslateRequest"
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "TranslateRequest": {
+      "type": "object",
+      "properties": {
+        "originalLanguage": {
+          "type": "string"
+        },
+        "targetLanguage": {
+          "type": "string"
+        },
+        "translatedString": {
+          "type": "string"
+        }
+      },
+      "title": "TranslateRequest"
+    }
+  }
+}
