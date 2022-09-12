@@ -1,61 +1,59 @@
 package com.translator.tinkoff_test_translator.yandex_translation
 
+import com.translator.tinkoff_test_translator.TranslatedPair
+import com.translator.tinkoff_test_translator.TranslationResponsePair
+import com.translator.tinkoff_test_translator.TranslationTaskPreparerService
 import com.translator.tinkoff_test_translator.dto.DataForTranslation
-import com.translator.tinkoff_test_translator.dto.TranslatedData
-import com.translator.tinkoff_test_translator.dto.mappers.YandexApiResponseToTranslatedDataMapper
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.postForEntity
-import java.util.concurrent.Callable
+import java.net.http.HttpHeaders
+import java.util.Collections.synchronizedList
+import java.util.LinkedList
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Future
 
 
 @Service
 class YandexTranslationService(
     @Value("\${url.api.yandex}") private val yandexApiUrl: String,
     @Value("\${api-key.yandex}") private val yandexApiKey: String,
-    private val httpClient: RestTemplate,
+    @Value("\${api-key.header-key.yandex}") private val yandexHeaderKey: String,
     private val threadPool: ExecutorService,
-    private val mapper: YandexApiResponseToTranslatedDataMapper
-) {
+    private val translationTaskPreparer: TranslationTaskPreparerService,
+)
+{
+    private val headers = translationTaskPreparer.getHeaders(mapOf(Pair(yandexHeaderKey, yandexApiKey)))
 
-    fun translate(dataForTranslation: DataForTranslation): TranslatedData {
-        val resultResponseList = mutableListOf<Word>()
-        val tasks = getTasks(dataForTranslation, resultResponseList)
-        threadPool.invokeAll(tasks)
+    fun translate(dataForTranslation: DataForTranslation): List<TranslatedPair> {
         println(dataForTranslation.words.size)
-        println(resultResponseList.size)
-        val response = YandexApiResponse(resultResponseList)
+        val requests = getRequestOnEachWord(dataForTranslation)
+        val tasks = translationTaskPreparer.getTasks<YandexApiReqest, YandexApiResponse>(
+            headers,
+            requests,
+            yandexApiUrl
+        )
+        val futures = threadPool.invokeAll(tasks)
 
-        return mapper.map(response)
+        return getTranslatedPairs(futures)
     }
 
-    private fun getHeaders(): HttpHeaders {
-        val headers = HttpHeaders()
-        headers["Authorization"] = yandexApiKey
-        return headers
-    }
-
-    private fun getTasks(
-        dataForTranslation: DataForTranslation,
-        resultResponseList: MutableList<Word>
-    ): List<Callable<Boolean>> {
-        return dataForTranslation.words.map { word ->
-            Callable {
-                val entity = HttpEntity<YandexApiReqest>(
-                    YandexApiReqest(
-                        dataForTranslation.originalLanguage, dataForTranslation.targetLanguage, listOf(word)
-                    ), getHeaders()
-                )
-                val response = httpClient.postForEntity<YandexApiResponse>(yandexApiUrl, entity)
-                // TODO: 11.09.2022
-                resultResponseList.addAll(response.body!!.translations)
-            }
-
+    private fun getRequestOnEachWord(dataForTranslation: DataForTranslation): List<YandexApiReqest> {
+        return dataForTranslation.words.toSet().map { word ->
+            YandexApiReqest(
+                dataForTranslation.originalLanguage,
+                dataForTranslation.targetLanguage,
+                listOf(word)
+            )
         }
+    }
+
+    private fun getTranslatedPairs(futures: List<Future<TranslationResponsePair<YandexApiReqest, YandexApiResponse>>>): List<TranslatedPair> {
+        val translatedPairs = futures.map { future ->
+            TranslatedPair(
+                future.get().request.body!!.texts.joinToString(" "),
+                future.get().response.body!!.translations.joinToString(" ") { it.text })
+        }
+        return translatedPairs
     }
 
 }

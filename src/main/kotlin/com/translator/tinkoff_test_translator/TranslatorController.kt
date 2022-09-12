@@ -15,7 +15,8 @@ import javax.servlet.http.HttpServletRequest
 class TranslatorController(
     private val translationService: TranslationService,
     private val translationRequestToDataForTranslationMapper: TranslationRequestToDataForTranslationMapper,
-    private val translatedDataToTranslationResponseMapper: TranslatedDataToTranslationResponseMapper
+    private val translatedDataToTranslationResponseMapper: TranslatedDataToTranslationResponseMapper,
+    private val cachingService: CachingService
 ) {
 
     @PostMapping("yandex-translator")
@@ -23,7 +24,7 @@ class TranslatorController(
         val dataForTranslation = translationRequestToDataForTranslationMapper.map(requestData)
         val translatedData = translationService.translateByYandex(dataForTranslation)
         val response = translatedDataToTranslationResponseMapper.map(translatedData)
-        println(request.remoteAddr)
+        cachingService.cache(requestData, response, request, translatedData)
         return ResponseEntity.ok(response)
     }
 

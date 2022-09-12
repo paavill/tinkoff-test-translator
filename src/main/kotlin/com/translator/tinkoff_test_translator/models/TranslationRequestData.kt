@@ -4,18 +4,23 @@ import lombok.AllArgsConstructor
 import lombok.Builder
 import lombok.Data
 import lombok.NoArgsConstructor
+import java.util.*
 import javax.persistence.*
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
 @Entity
-@Table(name = "input_data")
-data class TranslationRequestData(
+@Table(name = "translation_request_data")
+class TranslationRequestData(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Long
-
-
+    val id: Long? = null,
+    @OneToMany(mappedBy = "translationRequest")
+    val translatedWords: List<TranslatedWord>? = null,
+    val originalLanguage: String,
+    val targetLanguage: String,
+    @Column(length = 100000)
+    val originalString: String,
+    @Column(length = 100000)
+    val translatedString: String,
+    val ipAddress: String,
+    val requestTime: Date
 )
