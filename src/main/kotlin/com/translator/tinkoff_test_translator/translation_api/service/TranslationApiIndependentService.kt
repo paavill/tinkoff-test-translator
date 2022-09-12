@@ -1,28 +1,20 @@
-package com.translator.tinkoff_test_translator.service
+package com.translator.tinkoff_test_translator.translation_api.service
 
 import com.translator.tinkoff_test_translator.dto.DataForTranslation
 import com.translator.tinkoff_test_translator.dto.TranslatedData
 import com.translator.tinkoff_test_translator.translation_api.ApiTranslationService
 import com.translator.tinkoff_test_translator.translation_api.model.TranslatedPair
-import com.translator.tinkoff_test_translator.translation_api.yandex_translation.YandexTranslationService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-class TranslationService(
-    private val yandexTranslationService: YandexTranslationService,
+class TranslationApiIndependentService(
     private val cachingService: CachingService,
     private val requestService: ThreadPoolRequestService,
 ) {
+    private val logger = LoggerFactory.getLogger(TranslationApiIndependentService::class.java)
 
-    private val logger = LoggerFactory.getLogger(TranslationService::class.java)
-
-    fun translateByYandex(dataForTranslation: DataForTranslation): TranslatedData {
-        logger.info("Translation by Yandex API started.")
-        return translateByAnyTranslator(dataForTranslation, yandexTranslationService)
-    }
-
-    private fun translateByAnyTranslator(
+    fun translateByAnyTranslator(
         dataForTranslation: DataForTranslation, apiTranslationService: ApiTranslationService
     ): TranslatedData {
         val cachedTranslatedData = cachingService.getCachedKeyValueOriginalWordAndTranslatedPairs(dataForTranslation)
@@ -40,7 +32,7 @@ class TranslationService(
         )
     }
 
-    fun getTranslatedPairsByApi(
+    private fun getTranslatedPairsByApi(
         toApiTranslate: DataForTranslation, apiTranslationService: ApiTranslationService
     ): Map<String, TranslatedPair> {
         return requestService.translate(
@@ -72,5 +64,4 @@ class TranslationService(
             )
         )
     }
-
 }

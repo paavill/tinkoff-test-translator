@@ -2,8 +2,8 @@ package com.translator.tinkoff_test_translator.controller
 
 import com.translator.tinkoff_test_translator.dto.mappers.TranslatedDataToTranslationResponseMapper
 import com.translator.tinkoff_test_translator.dto.mappers.TranslationRequestToDataForTranslationMapper
-import com.translator.tinkoff_test_translator.service.CachingService
-import com.translator.tinkoff_test_translator.service.TranslationService
+import com.translator.tinkoff_test_translator.translation_api.service.CachingService
+import com.translator.tinkoff_test_translator.translation_api.service.TranslationService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
