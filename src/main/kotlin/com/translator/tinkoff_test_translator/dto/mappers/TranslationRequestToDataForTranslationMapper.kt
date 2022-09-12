@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class TranslationRequestToDataForTranslationMapper {
     fun map(request: TranslationRequest): DataForTranslation {
-        val words = request.translatedString.trim().split(" ")
+        val words = request.translatedString.trim().split(" ", "-")
         return DataForTranslation(request.originalLanguage, request.targetLanguage, words)
     }
 }

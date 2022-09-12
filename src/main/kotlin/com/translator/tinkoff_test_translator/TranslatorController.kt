@@ -20,6 +20,7 @@ class TranslatorController(
 ) {
 
     @PostMapping("yandex-translator")
+
     fun translateByYandex(@RequestBody requestData: TranslationRequest, request: HttpServletRequest): ResponseEntity<TranslationResponse> {
         val dataForTranslation = translationRequestToDataForTranslationMapper.map(requestData)
         val translatedData = translationService.translateByYandex(dataForTranslation)

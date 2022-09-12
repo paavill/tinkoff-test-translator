@@ -1,16 +1,13 @@
 package com.translator.tinkoff_test_translator.yandex_translation
 
-import com.translator.tinkoff_test_translator.TranslatedPair
-import com.translator.tinkoff_test_translator.TranslationResponsePair
-import com.translator.tinkoff_test_translator.TranslationTaskPreparerService
+import com.translator.tinkoff_test_translator.*
 import com.translator.tinkoff_test_translator.dto.DataForTranslation
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpEntity
 import org.springframework.stereotype.Service
-import java.net.http.HttpHeaders
-import java.util.Collections.synchronizedList
-import java.util.LinkedList
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Future
+import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.postForEntity
 
 
 @Service
@@ -18,42 +15,40 @@ class YandexTranslationService(
     @Value("\${url.api.yandex}") private val yandexApiUrl: String,
     @Value("\${api-key.yandex}") private val yandexApiKey: String,
     @Value("\${api-key.header-key.yandex}") private val yandexHeaderKey: String,
-    private val threadPool: ExecutorService,
+    @Value("\${constraint.yandex.numberOfWordsPerTime}") private val numberOfWordsPerTime: Int,
+    @Value("\${constraint.yandex.time}") private val time: Long,
+    private val httpClient: RestTemplate,
     private val translationTaskPreparer: TranslationTaskPreparerService,
-)
-{
+) : ApiTranslationService {
     private val headers = translationTaskPreparer.getHeaders(mapOf(Pair(yandexHeaderKey, yandexApiKey)))
-
-    fun translate(dataForTranslation: DataForTranslation): List<TranslatedPair> {
-        println(dataForTranslation.words.size)
-        val requests = getRequestOnEachWord(dataForTranslation)
-        val tasks = translationTaskPreparer.getTasks<YandexApiReqest, YandexApiResponse>(
-            headers,
-            requests,
-            yandexApiUrl
+    override fun translate(dataForTranslation: DataForTranslation): TranslatedPair {
+        val request = getRequest(dataForTranslation)
+        val entity = HttpEntity<YandexApiReqest>(
+            request, headers
         )
-        val futures = threadPool.invokeAll(tasks)
-
-        return getTranslatedPairs(futures)
+        val response =
+            httpClient.runCatching { postForEntity<YandexApiResponse>(yandexApiUrl, entity) }
+                .getOrElse { throw Exception("AfterRequest: " + it.message) }
+        val translatedPair = getTranslatedPairs(TranslationResponsePair(entity, response))
+        return translatedPair
     }
 
-    private fun getRequestOnEachWord(dataForTranslation: DataForTranslation): List<YandexApiReqest> {
-        return dataForTranslation.words.toSet().map { word ->
-            YandexApiReqest(
-                dataForTranslation.originalLanguage,
-                dataForTranslation.targetLanguage,
-                listOf(word)
-            )
-        }
+    override fun getConstraint(): ApiRequestConstraint {
+        return ApiRequestConstraint(numberOfWordsPerTime, time)
     }
 
-    private fun getTranslatedPairs(futures: List<Future<TranslationResponsePair<YandexApiReqest, YandexApiResponse>>>): List<TranslatedPair> {
-        val translatedPairs = futures.map { future ->
-            TranslatedPair(
-                future.get().request.body!!.texts.joinToString(" "),
-                future.get().response.body!!.translations.joinToString(" ") { it.text })
-        }
-        return translatedPairs
+    private fun getRequest(dataForTranslation: DataForTranslation): YandexApiReqest {
+        return YandexApiReqest(
+            dataForTranslation.originalLanguage,
+            dataForTranslation.targetLanguage,
+            dataForTranslation.words
+        )
+    }
+
+    private fun getTranslatedPairs(translatedResponsePair: TranslationResponsePair<YandexApiReqest, YandexApiResponse>): TranslatedPair {
+        val original = translatedResponsePair.request.body!!.texts.joinToString(" ")
+        val translated = translatedResponsePair.response.body!!.translations.map { word -> word.text }.joinToString(" ")
+        return TranslatedPair(original, translated)
     }
 
 }
