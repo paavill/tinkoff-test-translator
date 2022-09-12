@@ -1,8 +1,13 @@
-package com.translator.tinkoff_test_translator.yandex_translation
+package com.translator.tinkoff_test_translator.translation_api.yandex_translation
 
-import com.translator.tinkoff_test_translator.*
 import com.translator.tinkoff_test_translator.dto.DataForTranslation
-import org.slf4j.LoggerFactory
+import com.translator.tinkoff_test_translator.exception.TranslateServiceException
+import com.translator.tinkoff_test_translator.translation_api.ApiRequestConstraint
+import com.translator.tinkoff_test_translator.translation_api.ApiTranslationService
+import com.translator.tinkoff_test_translator.translation_api.YandexApiResponse
+import com.translator.tinkoff_test_translator.translation_api.model.TranslatedPair
+import com.translator.tinkoff_test_translator.translation_api.model.TranslationResponsePair
+import com.translator.tinkoff_test_translator.translation_api.model.TranslationTaskPreparerService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.stereotype.Service
@@ -28,9 +33,10 @@ class YandexTranslationService(
         )
         val response =
             httpClient.runCatching { postForEntity<YandexApiResponse>(yandexApiUrl, entity) }
-                .getOrElse { throw Exception("AfterRequest: " + it.message) }
-        val translatedPair = getTranslatedPairs(TranslationResponsePair(entity, response))
-        return translatedPair
+                .getOrElse {
+                    throw TranslateServiceException(YandexTranslationService::class.toString(), it.message ?: "")
+                }
+        return getTranslatedPairs(TranslationResponsePair(entity, response))
     }
 
     override fun getConstraint(): ApiRequestConstraint {

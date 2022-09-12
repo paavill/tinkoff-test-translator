@@ -1,3 +1,3 @@
-package com.translator.tinkoff_test_translator.dto
+package com.translator.tinkoff_test_translator.controller
 
 data class TranslationResponse(val translatedString: String)

@@ -1,14 +1,15 @@
-package com.translator.tinkoff_test_translator
+package com.translator.tinkoff_test_translator.controller
 
-import com.translator.tinkoff_test_translator.dto.TranslationRequest
-import com.translator.tinkoff_test_translator.dto.TranslationResponse
 import com.translator.tinkoff_test_translator.dto.mappers.TranslatedDataToTranslationResponseMapper
 import com.translator.tinkoff_test_translator.dto.mappers.TranslationRequestToDataForTranslationMapper
+import com.translator.tinkoff_test_translator.service.CachingService
+import com.translator.tinkoff_test_translator.service.TranslationService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import javax.servlet.http.HttpServletRequest
+import javax.validation.Valid
 
 
 @RestController
@@ -21,7 +22,10 @@ class TranslatorController(
 
     @PostMapping("yandex-translator")
 
-    fun translateByYandex(@RequestBody requestData: TranslationRequest, request: HttpServletRequest): ResponseEntity<TranslationResponse> {
+    fun translateByYandex(
+        @Valid @RequestBody requestData: TranslationRequest,
+        request: HttpServletRequest
+    ): ResponseEntity<TranslationResponse> {
         val dataForTranslation = translationRequestToDataForTranslationMapper.map(requestData)
         val translatedData = translationService.translateByYandex(dataForTranslation)
         val response = translatedDataToTranslationResponseMapper.map(translatedData)

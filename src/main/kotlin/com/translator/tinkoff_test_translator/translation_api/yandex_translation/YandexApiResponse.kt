@@ -1,4 +1,4 @@
-package com.translator.tinkoff_test_translator.yandex_translation
+package com.translator.tinkoff_test_translator.translation_api
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

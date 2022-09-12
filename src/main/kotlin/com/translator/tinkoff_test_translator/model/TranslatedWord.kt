@@ -1,4 +1,4 @@
-package com.translator.tinkoff_test_translator.models
+package com.translator.tinkoff_test_translator.model
 
 import javax.persistence.Entity
 import javax.persistence.Id

@@ -1,9 +1,5 @@
-package com.translator.tinkoff_test_translator.models
+package com.translator.tinkoff_test_translator.model
 
-import lombok.AllArgsConstructor
-import lombok.Builder
-import lombok.Data
-import lombok.NoArgsConstructor
 import java.util.*
 import javax.persistence.*
 

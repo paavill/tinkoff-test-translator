@@ -1,6 +1,6 @@
-package com.translator.tinkoff_test_translator.repositories
+package com.translator.tinkoff_test_translator.repository
 
-import com.translator.tinkoff_test_translator.models.TranslationRequestData
+import com.translator.tinkoff_test_translator.model.TranslationRequestData
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 

@@ -1,6 +1,6 @@
-package com.translator.tinkoff_test_translator.repositories
+package com.translator.tinkoff_test_translator.repository
 
-import com.translator.tinkoff_test_translator.models.TranslatedWord
+import com.translator.tinkoff_test_translator.model.TranslatedWord
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -14,6 +14,6 @@ interface TranslatedWordRepository : CrudRepository<TranslatedWord, String> {
     )
     fun getTranslatedWordsByOriginalWordsAndTargetLanguage(
         @Param("targetLanguage") targetLanguage: String,
-        @Param("originalWords") originalWords: Set<String>
+        @Param("originalWords") originalWords: List<String>
     ): List<TranslatedWord>
 }

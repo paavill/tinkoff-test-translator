@@ -1,13 +1,14 @@
-package com.translator.tinkoff_test_translator
+package com.translator.tinkoff_test_translator.service
 
+import com.translator.tinkoff_test_translator.translation_api.model.TranslatedPair
 import com.translator.tinkoff_test_translator.dto.DataForTranslation
 import com.translator.tinkoff_test_translator.dto.TranslatedData
-import com.translator.tinkoff_test_translator.dto.TranslationRequest
-import com.translator.tinkoff_test_translator.dto.TranslationResponse
-import com.translator.tinkoff_test_translator.models.TranslatedWord
-import com.translator.tinkoff_test_translator.models.TranslationRequestData
-import com.translator.tinkoff_test_translator.repositories.TranslatedWordRepository
-import com.translator.tinkoff_test_translator.repositories.TranslationRequestDataRepository
+import com.translator.tinkoff_test_translator.controller.TranslationRequest
+import com.translator.tinkoff_test_translator.controller.TranslationResponse
+import com.translator.tinkoff_test_translator.model.TranslatedWord
+import com.translator.tinkoff_test_translator.model.TranslationRequestData
+import com.translator.tinkoff_test_translator.repository.TranslatedWordRepository
+import com.translator.tinkoff_test_translator.repository.TranslationRequestDataRepository
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.servlet.http.HttpServletRequest
@@ -41,7 +42,7 @@ class CachingService(
     fun getCachedKeyValueOriginalWordAndTranslatedPairs(dataForTranslation: DataForTranslation): Map<String, TranslatedPair> {
         return translatedWordRepository.getTranslatedWordsByOriginalWordsAndTargetLanguage(
             dataForTranslation.targetLanguage,
-            dataForTranslation.words.toSet()
+            dataForTranslation.words,
         ).associate { it.originalWord to TranslatedPair(it.originalWord, it.targetWord) }
     }
 }
