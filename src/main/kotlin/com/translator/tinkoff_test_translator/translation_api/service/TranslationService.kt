@@ -19,8 +19,4 @@ class TranslationService(
         return translationApiIndependentService.translateByAnyTranslator(dataForTranslation, yandexTranslationService)
     }
 
-    fun translateByGoogle(dataForTranslation: DataForTranslation): TranslatedData {
-        TODO()
-    }
-
 }
