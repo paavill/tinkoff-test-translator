@@ -4,6 +4,6 @@ import com.translator.tinkoff_test_translator.translation_api.model.TranslatedPa
 import com.translator.tinkoff_test_translator.dto.DataForTranslation
 
 interface ApiTranslationService {
-    fun translate(dataForTranslation: DataForTranslation): TranslatedPair
+    fun translate(dataForTranslation: DataForTranslation): List<TranslatedPair>
     fun getConstraint(): ApiRequestConstraint
 }

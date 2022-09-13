@@ -18,6 +18,16 @@ Available one route: **/word-by-word-translator/translate** . Documentation avai
   "translatedString": "string"
 }
 ```
+
+There is a possibility to change the number of words in one request to api. Regardless of the number of words in the query, each word is treated as a separate text.
+
+**application.properties**
+```
+...
+  words_by_request = <your_valuer>
+...
+```
+(default value = 1)
 ## DB
 Used H2 with in memory mode. To check the console is available at: host:port/h2-console. The username and password are set in application.properties or when the Docker container is started.
 ## Dockerfile / Docker-compose

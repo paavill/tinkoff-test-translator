@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 @Service
 class TranslationApiIndependentService(
     private val cachingService: CachingService,
-    private val requestService: ThreadPoolRequestService,
+    private val requestService: AbstractRequestService,
 ) {
     private val logger = LoggerFactory.getLogger(TranslationApiIndependentService::class.java)
 

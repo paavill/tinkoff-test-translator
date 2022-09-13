@@ -20,15 +20,15 @@ class YandexTranslationService(
     @Value("\${url.api.yandex}") private val yandexApiUrl: String,
     @Value("\${api-key.yandex}") private val yandexApiKey: String,
     @Value("\${api-key.header-key.yandex}") private val yandexHeaderKey: String,
-    @Value("\${constraint.yandex.numberOfWordsPerTime}") private val numberOfWordsPerTime: Int,
+    @Value("\${constraint.yandex.numberOfRequestsPerTime}") private val numberOfRequestsPerTime: Int,
     @Value("\${constraint.yandex.time}") private val time: Long,
     private val httpClient: RestTemplate,
     private val translationTaskPreparer: TranslationTaskPreparerService,
 ) : ApiTranslationService {
     private val headers = translationTaskPreparer.getHeaders(mapOf(Pair(yandexHeaderKey, yandexApiKey)))
-    override fun translate(dataForTranslation: DataForTranslation): TranslatedPair {
+    override fun translate(dataForTranslation: DataForTranslation): List<TranslatedPair> {
         val request = getRequest(dataForTranslation)
-        val entity = HttpEntity<YandexApiReqest>(
+        val entity = HttpEntity(
             request, headers
         )
         val response =
@@ -40,7 +40,7 @@ class YandexTranslationService(
     }
 
     override fun getConstraint(): ApiRequestConstraint {
-        return ApiRequestConstraint(numberOfWordsPerTime, time)
+        return ApiRequestConstraint(numberOfRequestsPerTime, time)
     }
 
     private fun getRequest(dataForTranslation: DataForTranslation): YandexApiReqest {
@@ -51,10 +51,9 @@ class YandexTranslationService(
         )
     }
 
-    private fun getTranslatedPairs(translatedResponsePair: TranslationResponsePair<YandexApiReqest, YandexApiResponse>): TranslatedPair {
-        val original = translatedResponsePair.request.body!!.texts.joinToString(" ")
-        val translated = translatedResponsePair.response.body!!.translations.map { word -> word.text }.joinToString(" ")
-        return TranslatedPair(original, translated)
+    private fun getTranslatedPairs(translatedResponsePair: TranslationResponsePair<YandexApiReqest, YandexApiResponse>): List<TranslatedPair> {
+        return translatedResponsePair.request.body!!.texts.zip(translatedResponsePair.response.body!!.translations)
+            .map { TranslatedPair(it.first, it.second.text) }
     }
 
 }

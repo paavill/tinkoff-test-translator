@@ -14,8 +14,10 @@ class ThreadPoolRequestService(
     private val threadPool: ExecutorService,
     @Value("\${thread_pool.thread_number}")
     private val threadPoolThreadNumber: Int,
-) {
-    fun translate(dataForRequests: DataForTranslation, translator: ApiTranslationService): List<TranslatedPair> {
+    @Value("\${words_by_request}")
+    override val wordsByRequest: Int
+) : AbstractRequestService() {
+    override fun translate(dataForRequests: DataForTranslation, translator: ApiTranslationService): List<TranslatedPair> {
         val tasks = getTasks(dataForRequests, translator)
         val futures = threadPool.invokeAll(tasks)
         return getTranslatedPairs(futures)
@@ -24,16 +26,16 @@ class ThreadPoolRequestService(
     private fun getTasks(
         dataForRequest: DataForTranslation,
         translator: ApiTranslationService
-    ): List<Callable<TranslatedPair>> {
-        return dataForRequest.words.map {
+    ): List<Callable<List<TranslatedPair>>> {
+        return dataForRequest.words.chunked(wordsByRequest) .map {
             Callable {
                 val constraint = translator.getConstraint()
-                Thread.sleep(constraint.time/(constraint.numberOfWordsPerTime/threadPoolThreadNumber))
+                Thread.sleep(constraint.time/(constraint.numberOfRequestsPerTime/threadPoolThreadNumber))
                 val result = translator.translate(
                     DataForTranslation(
                         dataForRequest.originalLanguage,
                         dataForRequest.targetLanguage,
-                        listOf(it)
+                        it
                     )
                 )
                 result
@@ -41,7 +43,7 @@ class ThreadPoolRequestService(
         }
     }
 
-    private fun getTranslatedPairs(futuresList: List<Future<TranslatedPair>>): List<TranslatedPair> {
-        return futuresList.map { it.get() }
+    private fun getTranslatedPairs(futuresList: List<Future<List<TranslatedPair>>>): List<TranslatedPair> {
+        return futuresList.map { it.get() }.flatten()
     }
 }
