@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  tinkoff-test-translator:
+    container_name: tinkoff-test-translator
+    build: .
+    image: tinkoff-test-translator
+    ports:
+      - "${EXTERNAL_PORT}:${INTERNAL_PORT}"
+    environment:
+      - INTERNAL_PORT=${INTERNAL_PORT}
+      - API_KEY=${API_KEY}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - ARTIFACT_NAME=${ARTIFACT_NAME}
