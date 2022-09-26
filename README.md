@@ -1,7 +1,7 @@
 # tinkoff-test-translator
 #### Text translator word by word.
 ## API
-Available one route: **/word-by-word-translator/translate** . Documentation available at /swagger-ui.html
+Available one route: **/yandex-translator** . Documentation available at /swagger-ui.html
 
 **input application/json:**
 ```
